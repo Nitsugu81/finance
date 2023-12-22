@@ -92,9 +92,6 @@ def plot_pred(actual_prices, predicted_prices) :
 def next_day_pred(model, model_inputs, scaler):
     prediction_days = 60
 
-    scaler.fit(model_inputs)
-    model_inputs = scaler.transform(model_inputs)
-
     real_data = [model_inputs[len(model_inputs) - prediction_days:len(model_inputs), 0]]
     real_data = np.array(real_data)
     real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
