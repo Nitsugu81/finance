@@ -79,9 +79,10 @@ def model_accuracy(company, start, end, data, model, scaler):
 
 
 # Method 4 : Plotting prediction for a company
-def plot_pred(actual_prices, predicted_prices) :
+def plot_pred(actual_prices, predicted_prices, predictions, num_days_to_predict) :
     plt.plot(actual_prices, color ="black", label =f"Actual {company} Price")
     plt.plot(predicted_prices, color ="red", label =f"Predicted {company} Price")
+    plt.plot(np.arange(len(actual_prices), len(actual_prices) + num_days_to_predict), predictions, color="blue", label=f"Predicted {company} Price (Future)")
     plt.title(f"{company} Share Price")
     plt.xlabel('Time')
     plt.ylabel('Share Price')
@@ -102,8 +103,8 @@ def next_day_pred(model, model_inputs, scaler):
     return print(f"Prediction : {prediction[0,0]}")
 
 # Method 6 : Prediction X Next Day
-def predict_future_days(model, model_inputs, scaler, num_days, actual_prices):
-    prediction_days = 60
+def predict_future_days(model, model_inputs, scaler, num_days):
+    prediction_days = 30
     predictions = []
 
     for _ in range(num_days):
@@ -117,17 +118,9 @@ def predict_future_days(model, model_inputs, scaler, num_days, actual_prices):
 
         # Mettre à jour model_inputs avec la nouvelle prédiction
         model_inputs = np.append(model_inputs, prediction, axis=0)
-        model_inputs = model_inputs[1:]
 
-    # Tracer les prédictions futures
-    plt.plot(actual_prices, color="black", label=f"Actual {company} Price")
-    plt.plot(np.arange(len(actual_prices), len(actual_prices) + num_days_to_predict), predictions, color="blue", label=f"Predicted {company} Price (Future)")
-    plt.title(f"{company} Share Price")
-    plt.xlabel('Time')
-    plt.ylabel('Share Price')
-    plt.legend()
-    plt.show()
 
+    return predictions
 
 
 # Main
@@ -148,6 +141,6 @@ num_days_to_predict = 100
 
 for company in companies : 
     actual_prices, predicted_prices, model_inputs = model_accuracy(company, test_start, test_end, data, model, scaler)
-    plot_pred(actual_prices, predicted_prices)
     next_day_pred(model, model_inputs, scaler)
-    predict_future_days(model, model_inputs, scaler, num_days_to_predict, actual_prices)
+    predictions = predict_future_days(model, model_inputs, scaler, num_days_to_predict)
+    plot_pred(actual_prices, predicted_prices, predictions, num_days_to_predict)
