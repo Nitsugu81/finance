@@ -36,7 +36,7 @@ def create_data(companies, start, end, scaler):
     return x_train, y_train, data
 
 # Method 2 : Create and Train Model
-def create_and_train_model(x_train, y_train, epochs=50, batch_size=64):
+def create_and_train_model(x_train, y_train, epochs=10, batch_size=64):
     model = Sequential()
     model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
     model.add(Dropout(0.2))
@@ -101,9 +101,37 @@ def next_day_pred(model, model_inputs, scaler):
 
     return print(f"Prediction : {prediction[0,0]}")
 
+# Method 6 : Prediction X Next Day
+def predict_future_days(model, model_inputs, scaler, num_days, actual_prices):
+    prediction_days = 60
+    predictions = []
+
+    for _ in range(num_days):
+        # Utiliser les 60 derniers jours pour prédire le jour suivant
+        real_data = [model_inputs[len(model_inputs) - prediction_days:len(model_inputs), 0]]
+        real_data = np.array(real_data)
+        real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
+
+        prediction = model.predict(real_data)
+        predictions.append(scaler.inverse_transform(prediction)[0, 0])
+
+        # Mettre à jour model_inputs avec la nouvelle prédiction
+        model_inputs = np.append(model_inputs, prediction, axis=0)
+        model_inputs = model_inputs[1:]
+
+    # Tracer les prédictions futures
+    plt.plot(actual_prices, color="black", label=f"Actual {company} Price")
+    plt.plot(np.arange(len(actual_prices), len(actual_prices) + num_days_to_predict), predictions, color="blue", label=f"Predicted {company} Price (Future)")
+    plt.title(f"{company} Share Price")
+    plt.xlabel('Time')
+    plt.ylabel('Share Price')
+    plt.legend()
+    plt.show()
+
+
 
 # Main
-companies=['GE','GOOG','AAPL']
+companies=['GE','GOOG','AAPL','MSFT','JPM','AMZN','TSLA']
 train_start = dt.datetime(2000,1,1)
 train_end = dt.datetime(2020,1,1)
 
@@ -116,7 +144,10 @@ model = create_and_train_model(x_train, y_train)
 test_start = dt.datetime(2020,1,1)
 test_end = dt.datetime.now()
 
+num_days_to_predict = 100
+
 for company in companies : 
     actual_prices, predicted_prices, model_inputs = model_accuracy(company, test_start, test_end, data, model, scaler)
     plot_pred(actual_prices, predicted_prices)
     next_day_pred(model, model_inputs, scaler)
+    predict_future_days(model, model_inputs, scaler, num_days_to_predict, actual_prices)
