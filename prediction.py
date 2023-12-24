@@ -104,7 +104,7 @@ def next_day_pred(model, model_inputs, scaler):
 
 # Method 6 : Prediction X Next Day
 def predict_future_days(model, model_inputs, scaler, num_days):
-    prediction_days = 30
+    prediction_days = 60
     predictions = []
 
     for _ in range(num_days):
@@ -125,7 +125,7 @@ def predict_future_days(model, model_inputs, scaler, num_days):
 
 # Main
 companies=['GE','GOOG','AAPL','MSFT','JPM','AMZN','TSLA']
-train_start = dt.datetime(2000,1,1)
+train_start = dt.datetime(2018,1,1)
 train_end = dt.datetime(2020,1,1)
 
 scaler = MinMaxScaler(feature_range=(0, 1))
